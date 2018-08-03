@@ -1,0 +1,441 @@
+<apex:page id="editacc" standardStylesheets="true" controller="AccountEditCtrl">
+
+<apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/angular.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/ngModelOptions.min.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.TypeAheadSearch, '/css/bootstrap.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/forceng.js')}"/>
+
+<style>
+    .panel-body .form-horizontal .form-group {
+    margin-right: 25px;
+    margin-left: 25px;
+    
+    .form-group.required label:after{
+    content:"*",color:red;font-size:20px;
+    position:absolute;margin: -2px 0 0 5px;
+    }
+    }
+    .requiredAngular
+    {
+        border-left:2px red solid;
+    }
+    
+    .error
+    {
+        color:red;
+        font-weight:bold;
+    }
+</style>
+<script>
+
+    var accsearchApp = angular.module("accsearchApp", []);
+    accsearchApp.controller('accsearchCtrl', function($scope) {
+    $scope.iscreatecon=false;        
+    $scope.selectedAccount = ''; 
+    $scope.selectedAccountCompany= ''; 
+    $scope.query='';
+    $scope.accList=[];
+    $scope.siteName="{!a.Name}";
+    $scope.siteCity="{!a.Site}";
+    $scope.country="{!a.OMG_Country__c}";
+    $scope.state="{!a.OMG_State_Province__c}";
+    $scope.isSubmitted=false;    
+    $scope.selectedAccountCompany='';
+    $scope.isrequired=true;
+    $scope.FirstName="{!c.FirstName}";
+    $scope.LastName="{!c.LastName}";
+    $scope.Email="{!c.Email}";
+    $scope.MobilePhone="{!c.MobilePhone}";
+    if($scope.islinkAcc)
+        $scope.selectedAccount="{!parentAccount}"
+    
+        $scope.searchAccounts=function(recType)
+        {
+            //make remoting call by passing selected contact filter value.
+            var selectedAccount;
+            $scope.queryCompany='';
+            $scope.accList=[];
+            $scope.query='';
+            var selectedAccount=$scope.selectedAccountCompany;           
+                
+            Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.AccountEditCtrl.searchAccounts}',$scope.selectedAccountCompany,recType,
+                        function(result, event){
+                            
+                                // apply scope values
+                                    $scope.accList=result;
+                                    $scope.$apply(); 
+                            
+                            
+                        });
+            
+        }
+        
+        $scope.setValue=function(acc)
+        {
+            $scope.selectedAccountCompany=acc.Name;
+            $scope.queryCompany=acc.Id;   
+            $scope.parentAccount=acc.Parent.Name;
+            $scope.companyAccount=acc.Name;
+            $scope.siteName=acc.Name;            
+        }  
+        
+        $scope.setValuesforAccounts=function()
+        {
+           if(!$scope.islinkAcc)
+            {
+                $scope.parentAccount=$scope.siteName;
+                $scope.companyAccount=$scope.siteName;
+            }            
+        }
+        
+        //multipicklist error scenario 
+        
+        $scope.isNull=function()
+        {
+            var a='editacc:j_id5:j_id21_selected';
+            
+            if(document.getElementById(a).length==0)
+                return true;
+            else
+                return false;          
+        }        
+        
+        
+    // call action functions and redirect to the detail page of Case
+        $scope.redirectToNextPage=function()
+        {
+           redirectActionFn();                    
+        }
+        
+         $scope.doCancel=function()
+         {
+            cancelActionFn();                    
+         } 
+         
+         $scope.checkCountry=function()
+         {
+            var a="{!a.Site}";
+            
+             if(($scope.country).toUpperCase()=='UNITED STATES' || ($scope.country).toUpperCase()=='CANADA')
+             {
+                $scope.isrequiredPx=2;
+                if(a!='GTR')
+                    $scope.isrequiredPx1=2;
+                    
+                return true;
+             }
+            else
+            {
+                $scope.isrequiredPx=0;
+                 if(a!='GTR')
+                    $scope.isrequiredPx1=0;
+                return false; 
+            }
+             
+         }
+         
+        $scope.isNullConType=function()
+        {        
+            var a='editacc:j_id5:j_id44_selected'; 
+            if(document.getElementById(a).length==0)
+                return true;
+            else
+                return false;                
+        }
+        
+        $scope.isErrorPresent=function()
+        {
+
+                   if($scope.isNull() || ($scope.checkCountry() && !$scope.state) || ($scope.isrequired && !$scope.siteCity) || ($scope.isrequired && !$scope.siteName) || !$scope.country
+                     || ($scope.iscreatecon && !$scope.FirstName) || ($scope.iscreatecon  && !$scope.LastName) || ($scope.iscreatecon && !$scope.Email) 
+                     || ($scope.iscreatecon && !$scope.MobilePhone) || ($scope.isNullConType() && $scope.iscreatecon))
+                    {
+                        return false;
+                    }
+                   else
+                    {
+                        return true;
+                    }            
+        }
+         
+    });
+    
+    function validateSubmit()
+      {
+       var scope = angular.element(document.getElementById('bdiv')).scope();
+       scope.isSubmitted=true;
+       $scope.$apply();
+       return scope.isErrorPresent();
+      }
+</script>
+<apex:form html-name="form" html-ng-app="accsearchApp" html-ng-controller="accsearchCtrl">
+<div id="bdiv" class="bs">
+<div class="panel-group">
+     <div class="row">
+      <div class="col-md-10">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Site Details</h3>
+          </div>
+          <div class="panel-body">
+         <table class="table">
+        <tr>
+            <td>
+            <table class="table table-striped" style="width:75%;">                              
+                <tr>
+                    <td style="vertical-align:middle"> <b>Site Name</b></td>
+                    <td> <apex:inputfield value="{!a.Name}" html-ng-model="siteName" style="border-left:2px red solid" styleClass="form-control"/>
+                    <div ng-show="isSubmitted && isrequired && !siteName" class="error">
+                          You must enter a value.
+                    </div>
+                    </td>
+                </tr>                
+                <tr>
+                    <td style="vertical-align:middle"><b> Site Location(City)</b></td>
+                    <td> <apex:inputfield value="{!a.Site}" html-ng-model="siteCity" style="border-left:2px red solid"  styleClass="form-control"  html-ng-show="{!a.site!='GTR'}"/>
+                        <div ng-show="isSubmitted && isrequired && !siteCity" class="error">
+                              You must enter a value.
+                        </div>
+                     <apex:outputField value="{!a.Site}" html-ng-model="siteCityOutput1" style="border-left:2px red solid" styleClass="form-control"  html-ng-show="{!a.site=='GTR'}"/></td>
+                </tr>               
+                <tr>
+                    <td style="vertical-align:middle"><b>State/Province</b></td>
+                    <td><apex:inputfield value="{!a.OMG_State_Province__c}" html-ng-model="state" style="border-left:{{isrequiredPx}}px red solid" styleClass="form-control" /> 
+                        <div ng-show="isSubmitted && checkCountry() && !state" class="error">
+                              You must enter a value.
+                        </div>
+                    </td>
+                </tr>                
+                <tr>
+                    <td style="vertical-align:middle"><b>Country</b></td>
+                    <td> <apex:inputfield value="{!a.OMG_Country__c}" html-ng-model="country" style="border-left:2px red solid" styleClass="form-control"  />  
+                        <div ng-show="isSubmitted && !country" class="error">
+                              You must enter a value.
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                   <td style="vertical-align:middle"> <b> Website</b></td>
+                   <td> <apex:inputfield value="{!a.Website}"  styleClass="form-control"  /> </td>
+               </tr>               
+               <tr>
+                   <td style="vertical-align:middle"> <b> Description</b></td>
+                   <td>  <apex:inputfield value="{!a.Description}"  styleClass="form-control" /></td>
+               </tr>    
+            </table>
+            </td>            
+            <td>
+              <b> Client Type </b> <apex:inputfield value="{!a.OMG_AccountType__c}" html-ng-change="isNull()" style="border-left:2px red solid;" required="true" />
+              <div ng-show="isSubmitted && isNull()" class="error">
+                   You must enter a value.
+              </div>  
+            </td>
+            </tr>        
+    </table>
+   
+    </div>
+    </div>
+    
+    </div>
+   </div>  
+   
+   
+ 
+ <!-- Company Details Section -->
+    <div class="row">
+      <div class="col-md-7">
+       <table class="table">
+           <tr>
+               <td><b> Should this be linked to an existing Company record?  &nbsp; &nbsp; 
+                    <apex:outputlabel value="Yes" for="yesComp"/>
+                    <input type="radio" ng-model="Compval" name="yesComp" value="yes" ng-click="islinkAcc=true"/>
+                    <apex:outputlabel value="No" for="noComp"/>
+                    <input type="radio" ng-model="Compval" name="noComp" value="no" ng-click="islinkAcc=false"/>                    
+                    <apex:inputcheckbox value="{!isLinked}" html-ng-model="islinkAcc" style="display:none"/> 
+                    <apex:inputText value="{!selectedCompAccount}" html-ng-model="queryCompany" style="display:none;"/></b> 
+                </td>
+           </tr>
+       </table>
+      </div> 
+    </div>
+    
+    <!-- Search Table -->
+    <div class="row" ng-show="islinkAcc">
+      <div class="col-md-10">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Company Search</h3>
+          </div>
+          <div class="panel-body" ng-show="islinkAcc">
+          <table class="table">
+            <tr>
+                <td style="width:10%;vertical-align:middle;"> <b> Company </b> </td>
+                <td style="width:20%"> <div class="input-group add-on" style="width:95%">
+                <input class="form-control"  placeholder="Search Company....."
+                                            type="text" ng-model="selectedAccountCompany" 
+                                             ng-change="searchAccounts('Company')" style="position: static;" ng-model-options="{ debounce: 1500 }" >   
+                </input>
+                
+                <div class="input-group-btn">  
+                <button type="button" class="btn btn-primary" ng-click="selectedAccountCompany=null">x</button>       
+                </div>              
+                </div>
+                </td>
+                <td style="position:relative;width:15%;">  <img src="/img/loading32.gif" ng-model="myloadingimg" ng-show="showloading" />  </td>
+            </tr>
+           
+           </table>    
+            </div>
+            </div> <br/> <br/>
+             <div class="panel-group" ng-hide="no">
+                    <div class="panel panel-primary" ng-show="selectedAccountCompany!=null && selectedAccountCompany!=''">
+                        <div class="panel-heading">Company Results</div>
+                             <div class="panel-body">   
+                                <table class="table table-hover">
+                                    <th> Select </th>
+                                    <th> Company Name </th>
+                                    <th> Client Type </th>
+                                    <th> is CLE </th>
+                                    <tr ng-repeat="acc in accList | filter:queryCompany">
+                                        <td class="col-md-1"> <input type="radio" ng-model="$parent.Name" name="Id" value="{{acc.Id}}" ng-click="setValue(acc)"/> </td>
+                                        <td class="col-md-5"><a href="/{{acc.Id}}" target="_blank"> {{ acc.Name }}</a> 
+                                            <span><a href="/acc/account_hierarchy.jsp?id={{acc.Id}}" target="_blank"> [View Hierarchy] </a> </span> </td>
+                                        <td class="col-md-2"> {{ acc.OMG_AccountType__c }} </td>                                        
+                                        <td class="col-md-2"> {{ acc.is_CLE__c }} </td>
+                                    </tr>
+                                </table>
+                             </div>
+                             <br/> <br/>                             
+                    </div>
+                 </div>
+                        
+        
+        </div>
+    </div>  
+    <div class="row">
+      <div class="col-md-7">
+       <table class="table">
+           <tr>
+               <td><b> Do you want to create a Contact  &nbsp; &nbsp; 
+                    <apex:outputlabel value="Yes" for="yesContact"/>
+                    <input type="radio" ng-model="Contval" name="yesContact" value="yes" ng-click="iscreatecon=true"/>
+                    <apex:outputlabel value="No" for="noContact"/>
+                    <input type="radio" ng-model="Contval" name="noContact" value="no" ng-click="iscreatecon=false"/>
+                    <apex:inputCheckbox value="{!isCreateCon}"  html-ng-model="iscreatecon" style="display:none;"/> </b>                
+               </td>
+           </tr>
+       </table>
+      </div> 
+   </div>
+   <div class="row" ng-show="iscreatecon">
+      <div class="col-md-10">
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Contact Details</h3>
+          </div>
+          <div class="panel-body" ng-if="iscreatecon">
+         <table class="table">
+        <tr>
+            <td>
+            <table class="table table-striped">                
+                <tr>
+                <td style="vertical-align:middle"> <b>First Name</b></td>
+                <td> <apex:inputField value="{!c.FirstName}" html-ng-model="FirstName" style="border-left:2px red solid" styleclass="form-control" /> 
+                   <div ng-show="isSubmitted && !FirstName && iscreatecon" class="error">
+                          You must enter a value.
+                   </div>
+                </td>
+                </tr>
+                
+                <tr>
+                <td style="vertical-align:middle"><b> Last Name</b></td>
+                <td> <apex:inputText value="{!c.LastName}" html-ng-model="LastName" style="border-left:2px red solid" styleclass="form-control" />
+                    <div ng-show="isSubmitted && !LastName && iscreatecon" class="error">
+                           You must enter a value.
+                    </div>
+                </td>
+                </tr>
+                
+                <tr>
+                <td style="vertical-align:middle"><b>Email </b></td>
+                <td><apex:inputField value="{!c.Email}" html-ng-model="Email" style="border-left:2px red solid" styleclass="form-control" />
+                    <div ng-show="isSubmitted && !Email && iscreatecon" class="error">
+                           You must enter a value.
+                    </div>
+                </td>
+                </tr>
+                 
+                <tr>
+                <td style="vertical-align:middle"><b>Phone</b></td>
+                <td> <apex:inputField value="{!c.MobilePhone}" html-ng-model="MobilePhone" style="border-left:2px red solid" styleclass="form-control"/>
+                    <div ng-show="isSubmitted && !MobilePhone && iscreatecon" class="error">
+                           You must enter a value.
+                    </div>
+                </td>
+                </tr>
+            </table>
+            </td>
+            
+            <!--td style="vertical-align:middle">
+              <b>  Type </b> <apex:inputfield value="{!C.OMG_ContactType__c}" style="border-left:2px red solid" />
+                <div ng-show="isSubmitted && isNullConType() && iscreatecon" class="error">
+                          You must enter a value.
+                   </div>
+               
+            </td-->
+        </tr>
+
+    </table>
+    <div class="panel-group" ng-if="iscreatecon">
+         <div class="panel-heading"> <h4>Contact Address Details </h4></div>
+             <div class="panel-body">   
+                <table class="table table-hover">
+                   <tr>
+                    <td> <b>Mailing Street</b></td>
+                    <td>  <apex:inputField value="{!c.MailingStreet}" styleclass="form-control" /> </td>
+                    </tr>
+                    
+                    <tr>
+                    <td><b> Mailing City</b></td>
+                    <td>  <apex:inputField value="{!c.MailingCity}" styleclass="form-control" /></td>
+                    </tr>
+                    
+                    <tr>
+                    <td><b>Mailing State/Province</b></td>
+                    <td> <apex:inputField value="{!c.MailingState}"  styleclass="form-control" /> </td>
+                    </tr>
+                     
+                    <tr>
+                    <td><b>Mailing Zip/Postal Code  </b></td>
+                    <td>  <apex:inputField value="{!c.MailingPostalCode}"  styleclass="form-control" /> </td>
+                    </tr> 
+                    
+                    <tr>
+                    <td><b>Mailing Country  </b></td>
+                    <td>  <apex:inputField value="{!c.MailingCountry}"  styleclass="form-control" />  </td>
+                    </tr>                                            
+                </table>
+             </div>
+    </div>
+    </div>
+    </div>
+    
+    </div>
+    <br/> <br/>
+   </div>  
+    <div class="row">
+      <div class="col-md-10">
+                <center>
+                    <apex:commandButton Value="Back"  html-ng-click="isrequired=false" action="{!goBackToFirstPage}" styleclass="btn btn-primary"  immediate="true"/> &nbsp;                                   
+                    <apex:commandButton value="Next" html-ng-show="isErrorPresent()" onclick="return validateSubmit();" action="{!redirectToNextPage}" html-ng-click="setValuesforAccounts();"  styleclass="btn btn-success"/>  &nbsp; 
+                    <apex:commandButton Value="Cancel"  html-ng-click="isrequired=false" action="{!doCancel}" styleclass="btn btn-danger"  immediate="true"/> <br/> <br/> 
+                </center>
+     </div>
+    </div>
+</div>   
+</div> 
+<apex:inputText value="{!parentAccount}" html-ng-model="parentAccount" style="display:none;"/>
+<apex:inputText value="{!companyAccount}" html-ng-model="companyAccount" style="display:none;"/>
+</apex:form>
+</apex:page>

@@ -1,0 +1,14 @@
+<apex:page standardController="KnowledgeArticleVersion" renderAs="pdf" applyBodyTag="false">
+ <head>
+ <style type="text/css">
+ body { font-family: Arial Unicode MS; }
+ .companyName { font: bold 30px; color: red; }
+ </style>
+ </head>
+ <h1>Knowledge Article</h1>
+ <apex:panelGrid columns="1" width="100%">
+  <apex:outputText value="{!KnowledgeArticleVersion.Title}" label="Title" styleClass="companyName"/>
+ <apex:outputText value="{!KnowledgeArticleVersion.ArticleNumber}" label="Article Number"/>
+ <apex:outputText value="{!KnowledgeArticleVersion.Summary}" label="Summary"/>
+ </apex:panelGrid>
+</apex:page>

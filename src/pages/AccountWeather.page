@@ -1,0 +1,6 @@
+<apex:page standardController="Account" extensions="AccountWeatherController" showHeader="false" sidebar="false">
+  <apex:outputPanel >
+      <apex:outputLabel escape="false" value="{!htmlBody}"  style="display:block;width:550px;">
+      </apex:outputLabel>
+  </apex:outputPanel>
+</apex:page>

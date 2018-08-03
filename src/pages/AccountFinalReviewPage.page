@@ -1,0 +1,117 @@
+<apex:page controller="AccountEditCtrl">
+
+<!-- Include Static Resource Files -->
+<apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/angular.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/ngModelOptions.min.js')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.TypeAheadSearch, '/css/bootstrap.css')}"/>
+
+
+
+    <apex:form >
+        <div class="bs" style="padding-top:30px;">
+        <!-- Parent Account -->
+        <div class="panel-group">
+             <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Parent Account</h3>
+                  </div>
+             <div class="panel-body">
+                 <table class="table table-striped" style="width:50%;">
+                     <tr>
+                         <td> <apex:outputLabel value="Parent Name:"/></td>
+                         <td> {!UPPER(parentAccount)} </td>
+                     </tr>
+                 </table>
+            </div>
+            </div>
+        </div>
+        
+        <!-- Account Details -->
+          <div class="panel-group" style="padding-left:80px;">
+             <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Company Account</h3>
+                  </div>
+             <div class="panel-body">
+                 <table class="table table-striped" style="width:50%;">
+                     <tr>
+                         <td> <apex:outputLabel value="Company Name:"/></td>
+                         <td> {!companyAccount} </td>
+                     </tr>
+                 </table>
+            </div>
+            </div>
+        </div>
+        
+        <!-- Site Details -->
+          <div class="panel-group" style="padding-left:160px;">
+             <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Site Details</h3>
+                  </div>
+             <div class="panel-body">
+                 <table class="table table-striped" style="width:50%;">
+                     <tr>
+                         <td> <apex:outputLabel value="Site Name"/></td>
+                         <td> <apex:outputfield value="{!a.Name}" styleclass="form-control"/> </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="Site Location(City)"/></td>
+                         <td> {!a.Site} </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="State/Province"/></td>
+                         <td> {!a.OMG_State_Province__c} </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="Country"/></td>
+                         <td> {!a.OMG_Country__c} </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="Type"/></td>
+                         <td> {!a.Type} </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="Client Type"/></td>
+                         <td> <apex:outputfield value="{!a.OMG_AccountType__c}"/> </td>
+                     </tr>
+                 </table>
+            </div>
+            </div>
+        </div>
+        <apex:outputPanel rendered="false">
+            <!-- Contact Details -->
+          <div class="panel-group" style="padding-left:240px;">
+             <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Contact Details</h3>
+                  </div>
+             <div class="panel-body">
+                 <table class="table table-striped" style="width:50%;">
+                     <tr>
+                         <td> <apex:outputLabel value="First Name"/></td>
+                         <td> {!c.FirstName} </td>
+                     </tr>
+                      <tr>
+                         <td> <apex:outputLabel value="Last Name"/></td>
+                         <td> {!c.LastName} </td>
+                     </tr>
+                 </table>
+            </div>
+            </div>
+        </div>
+            
+            
+        </apex:outputPanel>
+        
+        <center>
+            <apex:commandButton Value="Back" action="{!goBack}" styleclass="btn btn-danger"/> &nbsp; 
+            <apex:commandButton Value="Submit" action="{!doSave}" styleclass="btn btn-success"/> &nbsp;
+            <apex:commandButton Value="Cancel" action="{!doCancel}" styleclass="btn btn-primary"/> 
+        </center>
+        </div>
+        
+        
+        
+    </apex:form>
+</apex:page>

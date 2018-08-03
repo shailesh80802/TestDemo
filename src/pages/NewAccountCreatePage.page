@@ -1,0 +1,194 @@
+<apex:page id="accpage" standardStylesheets="false" controller="AccountCreation">
+     <style>
+        a{cursor:pointer}
+        div.scroll{
+            max-height:400px;
+            overflow-y:auto;
+        }
+    </style>
+   
+    <apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/angular.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.TypeAheadSearch, '/js/ngModelOptions.min.js')}"/>
+     <apex:stylesheet value="{!URLFOR($Resource.TypeAheadSearch, '/css/bootstrap.css')}"/>
+    <script>
+    var accsearchApp = angular.module("accsearchApp", []);
+    accsearchApp.controller('accsearchCtrl', function($scope) {
+        $scope.query='';
+        $scope.accList=[];
+        $scope.typeValues={!TypePickListValues};
+        console.log($scope.typeValues);
+        $scope.typepl=$scope.typeValues[0].value;
+        
+        $scope.searchAccounts=function()
+        {
+            //make remoting call by passing selected Account filter value.
+            $scope.query='';
+            $scope.isGTRSite=false;
+             Visualforce.remoting.Manager.invokeAction(
+                        '{!$RemoteAction.AccountCreation.accountSearch}',$scope.selectedAccount,
+                        function(result, event){
+                            //if(event.status) 
+                           // {
+                                // apply scope values
+                                $scope.accList=result;
+                                $scope.$apply();
+ 
+                            //}
+                            //else alert("error occured. please contact system admin");
+                        });
+            
+        }
+        
+        $scope.setValue=function(acc)
+        {
+            $scope.selectedAccount=acc.Name;
+            $scope.query=acc.Id;
+            
+        }
+        
+        $scope.setDefaultGTRSiteLoc=function()
+        {
+
+        }
+        
+        // call action functions and redirect to the detail page of Case
+            $scope.redirectToNextPage=function()
+            {
+               redirectActionFn();                    
+            }
+            
+             $scope.doCancel=function()
+             {
+                cancelActionFn();                    
+             }
+        
+    });
+    
+    var salary = "1000$";
+
+     (function () {
+         console.log("Original salary was " + salary);
+    
+         var salary = "5000$";
+    
+         console.log("My New Salary " + salary);
+     })();
+     
+    </script>
+    <apex:form html-ng-app="accsearchApp" html-ng-controller="accsearchCtrl">
+        <div class="bs"> 
+          <br/> <br/>
+                <div class="panel-group">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">Search Company/Site</div>
+                             <div class="panel-body">   
+                                <table class="table table-striped">
+                                <tr>
+                                          <td colspan="2"> <b>First, search for an existing Company/Site or CLE to avoid creating a duplicate </b></td>
+                                     </tr>
+                                     <tr>
+                                        <td style="width:10%;vertical-align:middle;"> <b> Company/Site/CLE </b> </td>
+                                        <td style="width:20%"> <div class="input-group add-on" style="width:95%">
+                                        <input class="form-control"  placeholder="Search Company/Site....."
+                                                                    type="text" ng-model="selectedAccount" 
+                                                                     ng-change="searchAccounts()" style="position: static;" ng-model-options="{ debounce: 1500 }" onkeydown="if(event.keyCode==13){this.blur();actionFunction();}">   
+                                        </input>
+                                        
+                                        <div class="input-group-btn">  
+                                        <button type="button" class="btn btn-primary" ng-click="selectedAccount=null">x</button>       
+                                        </div>              
+                                        </div>
+                                        </td>
+                                        <td style="position:relative;width:15%;">  <img src="/img/loading32.gif" ng-model="myloadingimg" ng-show="showloading" />  </td>
+                                    </tr>
+                                    <tr ng-show="accList.length>0 || (selectedAccount!=null && selectedAccount!='')">
+                                         <td><b> Does your Company/Site/CLE Location exist? </b></td>
+                                         <td>                                                                            
+                                             <label for="yes">Yes</label>
+                                             <input id="yes" type="radio" name="content" ng-model="content" value="yes"/>
+                                             <label for="no">No</label>
+                                             <input id="no" type="radio" name="content" ng-model="content" value="no"/>
+                                         </td>
+                                         
+                                         
+                                         <!--apex:outputLabel value="Yes" for="yes"></apex:outputLabel> <input name="yes" type="checkbox" ng-model="yes"/> &nbsp; <apex:outputLabel value="No" for="no"/><input name="no" type="checkbox" ng-model="no"/></td--> 
+                                         
+                                    </tr>
+                               </table>    
+                            </div>
+                        </div>
+                    
+        </div>       
+        <div class="panel-group">
+                    <div class="panel panel-primary" ng-show="selectedAccount!=null && selectedAccount!=''">
+                        <div class="panel-heading">Company/Site Results</div>
+                             <div class="panel-body" ng-hide="accList.length == 0 || content =='no'">
+                                 <div class="alert alert-info" ng-show="accList.length">
+                                     Please Select the existing site from below results.
+                                 </div> 
+                                <table class="table table-hover">
+                                    <!--th> Select </th-->
+                                    <th> Company/Site Name </th>
+                                    <th> Site location </th>                                    
+                                    <th> Client Type </th>
+                                    <th> is CLE </th>
+                                    <tr ng-repeat="acc in accList | filter:query">
+                                        <!--td class="col-md-1"> <input type="radio" ng-model="$parent.Name" name="Id" value="{{acc.Id}}" ng-click="setValue(acc)"/> </td-->
+                                        <td class="col-md-5"><a href="/{{acc.Id}}" target="_blank"> {{ acc.Name }}</a> 
+                                            <span><a href="/acc/account_hierarchy.jsp?id={{acc.Id}}" target="_blank"> [View Hierarchy] </a> </span> </td>
+                                        <td class="col-md-2"> {{ acc.Site }} </td>
+                                        <td class="col-md-2"> {{ acc.Type}} </td>                                        
+                                        <td class="col-md-2">  </td>
+                                    </tr>
+                                </table>
+                                <div ng-show="accList.length<1"> <center> <h3 ng-show="selectedAccount!=null && selectedAccount!=''">
+                                <b>  No Records Found </b><br/>  <br/></h3></center></div>
+                             </div>                             
+                             <!--div ng-show="no"-->
+                             <div class="panel-group" ng-show="content == 'no' || accList.length == 0">
+                             <div class="alert alert-danger" ng-show="!accList.length">
+                                <strong>Sorry!</strong> No Site Records Found
+                              </div>
+                             <div ng-show="content == 'no'">
+                             <div class="panel-heading"> <h4>Site Details </h4></div>
+                                 <div class="panel-body">   
+                                    <table class="table table-hover">
+                                                                                
+                                        <tr>
+                                            <td>Is this a GTR Site ? &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
+                                             <apex:outputlabel value="Yes" for="yesgtr"/>
+                                                 <input type="radio" ng-model="gtrval" name="yesgtr" value="yes" ng-click="yesgtr=true"/>
+                                                 <apex:outputlabel value="No" for="nogtr"/>
+                                                 <input type="radio" ng-model="gtrval" name="nogtr" value="no" ng-click="yesgtr=false"/>
+                                            </td>    
+                                        </tr>                                                                                  
+                                        <tr >
+                                            <td> Please Select the Type of Site &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                             <select  ng-model="typepl" class="form-control" style="width:25%;">
+                                              <option   ng-repeat="type in typeValues" value="{{ type.value }}">{{ type.label }} </option></select> </td>
+                                        </tr>
+                                    </table>
+                                    <!--button type="button" ng-click="redirectToNextPage()"  styleclass="btn btn-success;align:center;" class="btn btn-primary"> Next </button>
+                                    <button type="button" ng-click="doCancel()"  styleclass="btn btn-success" class="btn btn-primary"> Cancel </button-->
+                                 </div>
+                                </div>  
+                             </div>
+                        
+                    </div>
+                 </div> 
+                 <div class="row">
+                  <div class="col-md-10" ng-show="gtrval!=null">
+                    <center>
+                        <apex:commandButton action="{!redirectToNextPage}" html-ng-click="setValuesforAccounts()" value="Next" styleclass="btn btn-success" onkeydown="if(event.keyCode==13){this.blur();actionFunction();}"/>  &nbsp; 
+                        <button type="button" ng-click="doCancel()"   class="btn btn-danger"> Cancel </button> <br/> <br/> 
+                    </center>
+                 </div>
+                </div>
+                    
+                 </div>
+                 <apex:inputcheckbox value="{!siteType}" html-ng-model="yesgtr" style="display:none;"/>
+                 <apex:inputText value="{!siteTypePL}" html-ng-model="typepl" style="display:none;"/>
+                 <apex:actionFunction action="{!redirectToNextPage}" name="redirectActionFn" rerender="accpage"></apex:actionFunction>
+                 <apex:actionFunction action="{!doCancel}" name="cancelActionFn" rerender="dummy"></apex:actionFunction>
+    </apex:form>
+</apex:page>

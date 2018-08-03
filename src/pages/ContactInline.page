@@ -1,0 +1,9 @@
+<apex:page standardController="contact" extensions="InLineController">
+ <apex:form >
+   <apex:pageBlock title="My Inline Visualforce page">
+    <b>Account Name : </b> <apex:outputField value="{!accRec.name}"/><br/>
+    <b>Account Number: </b> <apex:outputField value="{!accRec.accountnumber}"/><br/>
+     <b>Annual Revenue : </b>    <apex:outputField value="{!accRec.annualrevenue}"/>
+   </apex:pageBlock>
+ </apex:form>
+</apex:page>

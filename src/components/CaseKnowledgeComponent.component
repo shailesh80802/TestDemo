@@ -1,0 +1,16 @@
+<apex:component controller="CaseKnowledgeController" access="global">
+<apex:attribute name="kaID" type="Id" assignTo="{!kaID}" description="The KnowledgeArticleId to be passed to the controller" />
+<apex:attribute name="kaCount" type="Integer" assignTo="{!kaCount}" description="counter" />
+    <HTML>
+     <BODY>
+        <TABLE width="100%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" id="tblMain" style="{!breakStyle}">
+          <TR>
+              <TD style="color:white; background-color: black; height: 48px; vertical-align: middle; font-size: 20px; font-weight:bold;">{!relatedKAV.Title}</TD>
+          </TR>    
+          <TR>
+              <TD style="color:black; font-size: 12px; font-weight:normal;"><apex:outputtext value="{!relatedKAV.Description__c}" escape="false" /></TD>
+          </TR>
+        </TABLE>
+     </BODY>
+    </HTML>
+</apex:component>

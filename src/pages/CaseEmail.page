@@ -1,0 +1,44 @@
+<apex:page standardController="Case" sidebar="false" showHeader="false" extensions="CaseEmailCtrl">
+    <apex:form >
+        <apex:pageBlock >
+        <apex:pageMessages id="messagebox" />
+        <apex:actionRegion >
+            <apex:pageBlockSection columns="1" title="Email Message - Send an Email" collapsible="false">
+                <apex:inputText value="{!customerEmails}" label="To: " />
+                <apex:outputField value="{!cs.Subject}" label="Related To: "/>
+                <apex:pageBlockSectionItem >
+                 <apex:outputLabel value="Subject: " />
+                    <apex:outputPanel >                       
+                        <div class="requiredInput">
+                            <div class="requiredBlock"></div>
+                            <apex:inputText value="{!subject}" required="true" label="Subject: " title="Subject: "/>
+                        </div>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                 <apex:outputLabel value="Body: " />
+                    <apex:outputPanel >                       
+                        <div class="requiredInput">
+                            <div class="requiredBlock"></div>
+                            <apex:inputTextarea value="{!body}" required="true"  label="Body: " title="Body: " rows="10" cols="100"/>
+                        </div>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+              <!--   -->
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" title="Attachments" collapsible="true">
+                <apex:pageBlockTable var="ka" value="{!wrapperList}">
+                    <apex:column title="Attach" headerValue="Attach">
+                        <apex:inputCheckbox value="{!ka.isSelected}"/>
+                    </apex:column>
+                    <apex:column title="Name" headerValue="Name">
+                       <apex:outputLink target="_Blank" value="{!LEFT($CurrentPage.URL,FIND('/',$CurrentPage.URL,9))}articles/Knowledge_Base/{!ka.url}">{!ka.title}</apex:outputLink>                       
+                    </apex:column>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+            <br />
+            <apex:commandButton value="Send Email" action="{!sendEmail}"  id="emailSendId" immediate="false" reRender="messagebox"/>            
+        </apex:actionRegion>
+        </apex:pageBlock> 
+    </apex:form>
+</apex:page>
